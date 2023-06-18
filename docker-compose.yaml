@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    image: cicd-app:latest
+    container_name: cicd-app
+    ports:
+      - 5000:80
+    depends_on:
+      - db
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  db:
+    image: postgres:latest
+    volumes:
+      - ./db:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    restart: unless-stopped
