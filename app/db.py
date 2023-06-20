@@ -23,6 +23,7 @@ url = URL.create(
     password=POSTGRES_PASSWORD,
     host=POSTGRES_URL,
     database=POSTGRES_DATABASE,
+    port=5432
 )
 engine = create_engine(url)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
