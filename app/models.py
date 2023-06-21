@@ -5,11 +5,15 @@ class Base(DeclarativeBase):
     ...
 
 
-class Variable(Base):
-    __tablename__ = "variables"
+class Book(Base):
+    __tablename__ = "books"
 
-    name: Mapped[str] = mapped_column(primary_key=True)
-    value: Mapped[str] = mapped_column(default="")
+    isbn: Mapped[str] = mapped_column(primary_key=True)
+    title: Mapped[str]
+    author: Mapped[str]
+    publication_year: Mapped[int]
+    genre: Mapped[str]
+    price: Mapped[float]
 
     def __repr__(self) -> str:
-        return f"{self.name!r} = {self.value!r}>"
+        return f"{self.title!r} ({self.isbn!r})"

@@ -4,10 +4,10 @@ from fastapi import Depends, FastAPI
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
-from app.crud import create, delete, get_all, read, update
+from app.crud import create, delete, list_all, read, update
 from app.db import SessionLocal, engine
 from app.models import Base
-from app.schemas import VariableSchema
+from app.schemas import BookSchema
 
 app = FastAPI()
 
@@ -29,29 +29,49 @@ def get_db():
 
 @app.get("/")
 async def root():
-    return "Hello"
+    return {"message": "Hello"}
 
 
-@app.post("/create/{name}")
-async def create_var(name: str, var: VariableSchema, db: Session = Depends(get_db)):
-    return create(db, name, var.value)
+@app.post("/create")
+async def create_book(schema: BookSchema, db: Session = Depends(get_db)):
+    book = create(db, schema)
+
+    if book is None:
+        return {"message": "Book already exists"}
+    else:
+        return book
 
 
-@app.get("/read/{name}")
-async def read_var(name: str, db: Session = Depends(get_db)):
-    return read(db, name)
+@app.get("/read/{isbn}")
+async def read_book(isbn: str, db: Session = Depends(get_db)):
+    book = read(db, isbn)
+
+    if book is None:
+        return {"message": "Book not found"}
+    else:
+        return book
 
 
-@app.post("/update/{name}")
-async def update_var(name: str, var: VariableSchema, db: Session = Depends(get_db)):
-    return update(db, name, var.value)
+@app.post("/update")
+async def update_book(schema: BookSchema, db: Session = Depends(get_db)):
+    book = update(db, schema)
+
+    if book is None:
+        return {"message": "Book not found"}
+    else:
+        return book
 
 
-@app.post("/delete/{name}")
-async def delete_var(name: str, db: Session = Depends(get_db)):
-    return delete(db, name)
+@app.post("/delete/{isbn}")
+async def delete_book(isbn: str, db: Session = Depends(get_db)):
+    book = delete(db, isbn)
+
+    if book is None:
+        return {"message": "Book not found"}
+    else:
+        return book
 
 
 @app.get("/list")
-async def list_all(db: Session = Depends(get_db)):
-    return get_all(db)
+async def list_all_books(db: Session = Depends(get_db)):
+    return list_all(db)

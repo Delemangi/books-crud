@@ -1,101 +1,116 @@
 from sqlalchemy.orm import Session
 from . import models
+from . import schemas
 
 
-def create(db: Session, name: str, value: str):
+def create(db: Session, schema: schemas.BookSchema):
     """
-    Create a variable.
+    Create a book.
 
     Args:
-        db (Session): The session object.
-        name (str): The name of the variable.
-        value (str): The value of the variable.
+        db (Session): The database session object.
+        schema (BookSchema): The book schema.
 
     Returns:
-        Variable | None: The created variable, unless it already exists.
+        Book | None: The created book, unless one with the same ISBN already exists.
     """
 
-    if read(db, name) is not None:
+    existing_book = read(db, schema.isbn)
+
+    if existing_book is not None:
         return None
 
-    var = models.Variable(name=name, value=value)
-    db.add(var)
+    book = models.Book(
+        isbn=schema.isbn,
+        title=schema.title,
+        author=schema.author,
+        publication_year=schema.publication_year,
+        genre=schema.genre,
+        price=schema.price,
+    )
+    db.add(book)
     db.commit()
-    db.refresh(var)
+    db.refresh(book)
 
-    return var
+    return book
 
 
-def read(db: Session, name: str):
+def read(db: Session, isbn: str):
     """
-    Read a variable.
+    Read a book.
 
     Args:
-        db (Session): The session object.
-        name (str): The name of the variable.
+        db (Session): The database session object.
+        isbn (str): The ISBN of the book.
 
     Returns:
-        Optional[Variable]: The variable, if it exists.
+        Book | None: The book, if it exists.
     """
 
-    return db.query(models.Variable).filter(models.Variable.name == name).first()
+    return db.query(models.Book).filter(models.Book.isbn == isbn).first()
 
 
-def update(db: Session, name: str, value: str):
+def update(db: Session, schema: schemas.BookSchema):
     """
-    Update a variable.
+    Update a book.
 
     Args:
-        db (Session): The session object.
-        name (str): The name of the variable.
-        value (str): The value of the variable.
+        db (Session): The database session object.
+        schema (BookSchema): The book schema.
 
     Returns:
-        Optional[Variable]: The variable, if it exists.
+        Book | None: The book, if it exists.
     """
 
-    var = read(db, name)
-    if var is None:
+    book = read(db, schema.isbn)
+
+    if book is None:
         return None
 
-    var.value = value
+    book.title = schema.title
+    book.author = schema.author
+    book.publication_year = schema.publication_year
+    book.genre = schema.genre
+    book.price = schema.price
+
     db.commit()
-    db.refresh(var)
+    db.refresh(book)
 
-    return var
+    return book
 
 
-def delete(db: Session, name: str):
+def delete(db: Session, isbn: str):
     """
-    Delete a variable.
+    Delete a book.
 
     Args:
-        db (Session): The session object.
-        name (str): The name of the variable.
+        db (Session): The database session object.
+        isbn (str): The ISBN of the book.
 
     Returns:
-        Optional[Variable]: The variable, if it exists.
+        Book | None: The book, if it exists.
     """
 
-    var = read(db, name)
-    if var is None:
+    book = read(db, isbn)
+
+    if book is None:
         return None
 
-    db.delete(var)
+    db.delete(book)
     db.commit()
 
-    return var
+    return book
 
 
-def get_all(db: Session):
+def list_all(db: Session):
     """
-    Get all variables.
+    Get all books.
 
     Args:
-        db (Session): The session object.
+        db (Session): The database session object.
 
     Returns:
-        List[Variable]: The list of variables.
+        list[Book]: The list of all books.
     """
 
-    return db.query(models.Variable).all()
+    return db.query(models.Book).all()
