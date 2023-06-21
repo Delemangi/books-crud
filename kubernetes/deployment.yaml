@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kiii-project-config
+  namespace: kiii
+data:
+  POSTGRES_URL: kiii-project-postgres-service.kiii.svc.cluster.local
+  POSTGRES_DATABASE: postgres
+  POSTGRES_USER: postgres
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kiii-project-secret
+  namespace: kiii
+type: Opaque
+data:
+  password: cG9zdGdyZXM=
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiii-project-deployment
+  namespace: kiii
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: kiii-project
+  template:
+    metadata:
+      labels:
+        app: kiii-project
+    spec:
+      containers:
+        - name: kiii-project
+          image: delemangi/kiii-project:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: kiii-project-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kiii-project-secret
+                  key: password
