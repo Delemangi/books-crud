@@ -27,3 +27,7 @@ If you are running outside Docker and Kubernetes, you need:
 - `k3d cluster create cl -p "8081:80@loadbalancer"`
 - `cd kubernetes`
 - `kubectl apply -f namespace.yaml -f deployment.yaml -f service.yaml -f ingress.yaml -f database.yaml` - the order of the manifests matters
+
+## CD
+
+- Argo CD
